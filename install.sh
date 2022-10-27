@@ -37,4 +37,3 @@ rm -f ~/.config/nvim/init.vim
 cp init.vim ~/.config/nvim/init.vim
 cp coc-settings.json ~/.config/nvim
 
-source ~/.bashrc
