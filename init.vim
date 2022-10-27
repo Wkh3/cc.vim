@@ -8,13 +8,18 @@ Plug 'luochen1990/rainbow'
 Plug 'preservim/nerdtree'
 Plug 'Xuyuanp/nerdtree-git-plugin'
 Plug 'majutsushi/tagbar'
-Plug 'cdelledonne/vim-cmake'
 Plug 'octol/vim-cpp-enhanced-highlight'
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'liuchengxu/vim-clap', {'do': ':Clap install-binary!' }
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
 Plug 'rhysd/vim-clang-format'
+Plug 'fatih/vim-go', { 'do': ':GoInstallBinaries' }
+Plug 'airblade/vim-gitgutter'
+Plug 'neoclide/coc-tsserver'
+Plug 'easymotion/vim-easymotion'
+Plug 'tpope/vim-commentary'
+Plug 'tpope/vim-fugitive'
 call plug#end()
 
 let g:indent_guides_guide_size            = 1  " 指定对齐线的尺寸
@@ -23,28 +28,17 @@ let g:indent_guides_start_level           = 2  " 从第二层开始可视化显�
 " 开启语法高亮
 syntax on
 " 主题选用monokai
-colorscheme monokai
+
+function! CleverTab()
+        if strpart( getline('.'), 0, col('.')-1 ) =~ '^s*$'
+                return "\<Tab>"
+        else
+                return "\<C-N>"
+        endif
+endfunction
+inoremap <Tab> <C-R>=CleverTab()<CR>
 
 " 设置状态栏
-let g:airline#extensions#tabline#enabled = 1
-let g:airline#extensions#tabline#left_alt_sep = '|'
-let g:airline#extensions#tabline#buffer_nr_show = 0
-let g:airline#extensions#tabline#formatter = 'default'
-let g:airline_theme = 'desertink'  " 主题
-let g:airline#extensions#keymap#enabled = 1
-let g:airline#extensions#tabline#buffer_idx_mode = 1
-let g:airline#extensions#tabline#buffer_idx_format = {
-       \ '0': '0 ',
-       \ '1': '1 ',
-       \ '2': '2 ',
-       \ '3': '3 ',
-       \ '4': '4 ',
-       \ '5': '5 ',
-       \ '6': '6 ',
-       \ '7': '7 ',
-       \ '8': '8 ',
-       \ '9': '9 '
-       \}
 " 设置切换tab的快捷键 <\> + <i> 切换到第i个 tab
 nmap <leader>1 <Plug>AirlineSelectTab1
 nmap <leader>2 <Plug>AirlineSelectTab2
@@ -57,8 +51,8 @@ nmap <leader>8 <Plug>AirlineSelectTab8
 nmap <leader>9 <Plug>AirlineSelectTab9
 " 设置切换tab的快捷键 <\> + <-> 切换到前一个 tab
 nmap <leader>- <Plug>AirlineSelectPrevTab
-" 设置切换tab的快捷键 <\> + <+> 切换到后一个 tab
-nmap <leader>+ <Plug>AirlineSelectNextTab
+" 设置切换tab的快捷键 <\> + <=> 切换到后一个 tab
+nmap <leader>= <Plug>AirlineSelectNextTab
 " 设置切换tab的快捷键 <\> + <q> 退出当前的 tab
 nmap <leader>q :bp<cr>:bd #<cr>
 " 修改了一些个人不喜欢的字符
@@ -72,6 +66,8 @@ let g:airline_symbols.branch = 'BR'
 let g:airline_symbols.readonly = "RO"
 let g:airline_symbols.dirty = "DT"
 let g:airline_symbols.crypt = "CR" 
+
+let g:go_highlight_functions = 1
 
 "add spaces after comment delimiters by default
 let g:NERDSpaceDelims = 1
@@ -98,10 +94,6 @@ let g:NERDTrimTrailingWhitespace = 1
  
 " Enable NERDCommenterToggle to check all selected lines is commented or not
 let g:NERDToggleCheckAllLines = 1
-
-imap <C-_> <Esc><leader>c<Space>a
-map <C-_> <Leader>c<Space>
-vmap <C-_> <Leader>c<Space>
 
 let g:rainbow_active = 1
 let g:rainbow_conf = {
@@ -146,7 +138,7 @@ let NERDTreeDirArrows = 1
 nnoremap <C-f> :NERDTreeToggle<CR> " 开启/关闭nerdtree快捷键
 
 let g:tagbar_width=30
-nnoremap <silent> <C-t> :TagbarToggle<CR> " 将tagbar的开关按键设置为 ctrl t
+nnoremap <silent> <C-b> :TagbarToggle<CR> " 将tagbar的开关按键设置为 ctrl b
 
 "cpp-enhanced-highlight
 "高亮类，成员函数，标准库和模板
@@ -188,20 +180,8 @@ else
 endif
 
 " Use tab for trigger completion with characters ahead and navigate.
-" NOTE: There's always complete item selected by default, you may want to enable
-" no select by `"suggest.noselect": true` in your configuration file.
 " NOTE: Use command ':verbose imap <tab>' to make sure tab is not mapped by
 " other plugin before putting this into your config.
-inoremap <silent><expr> <TAB>
-      \ coc#pum#visible() ? coc#pum#next(1) :
-      \ CheckBackspace() ? "\<Tab>" :
-      \ coc#refresh()
-inoremap <expr><S-TAB> coc#pum#visible() ? coc#pum#prev(1) : "\<C-h>"
-
-" Make <CR> to accept selected completion item or notify coc.nvim to format
-" <C-g>u breaks current undo, please make your own choice.
-inoremap <silent><expr> <CR> coc#pum#visible() ? coc#pum#confirm()
-                              \: "\<C-g>u\<CR>\<c-r>=coc#on_enter()\<CR>"
 
 function! CheckBackspace() abort
   let col = col('.') - 1
@@ -215,16 +195,19 @@ else
   inoremap <silent><expr> <c-@> coc#refresh()
 endif
 
+" Make <CR> auto-select the first completion item and notify coc.nvim to
+" format on enter, <cr> could be remapped by other vim plugin
+
 " Use `[g` and `]g` to navigate diagnostics
 " Use `:CocDiagnostics` to get all diagnostics of current buffer in location list.
 nmap <silent> [g <Plug>(coc-diagnostic-prev)
 nmap <silent> ]g <Plug>(coc-diagnostic-next)
 
 " GoTo code navigation.
-"nmap <silent> gd <Plug>(coc-definition)
-"nmap <silent> gt <Plug>(coc-type-definition)
-"nmap <silent> gi <Plug>(coc-implementation)
-"nmap <silent> gr <Plug>(coc-references)
+nmap <silent> gd <Plug>(coc-definition)
+nmap <silent> gt <Plug>(coc-type-definition)
+nmap <silent> gi <Plug>(coc-implementation)
+nmap <silent> gr <Plug>(coc-references)
 
 " Use K to show documentation in preview window.
 nnoremap <silent> K :call ShowDocumentation()<CR>
@@ -336,8 +319,8 @@ set report=0
 set ignorecase
 set nocompatible
 set noeb
-set softtabstop=2
-set shiftwidth=2
+set softtabstop=4
+set shiftwidth=4
 set nobackup
 set autoread
 set nocompatible
@@ -346,14 +329,14 @@ set backspace=2 "能使用backspace回删
 syntax on "语法检测
 set ruler "显示最后一行的状态
 set laststatus=2 "两行状态行+一行命令行
-set ts=2
+set ts=4
 set expandtab
 set autoindent "设置c语言自动对齐
 set t_Co=256 "指定配色方案为256
 set mouse=a "设置可以在VIM使用鼠标
 set selection=exclusive
 set selectmode=mouse,key
-set tabstop=2 "设置TAB宽度
+set tabstop=4 "设置TAB宽度
 set history=1000 "设置历史记录条数   
 " 配色方案
 " let g:seoul256_background = 234
@@ -375,7 +358,7 @@ set fileencodings=ucs-bom,utf-8,cp936
 set fileencoding=utf-8
 set updatetime=300
 set shortmess+=c
-set signcolumn=yes
+set signcolumn=no
 
 " autocmd FileType json syntax match Comment +\/\/.\+$+
 
@@ -384,6 +367,7 @@ set foldlevelstart=99 " 每次打开文件时关闭折叠
 
 " hi Normal ctermfg=252 ctermbg=none "背景透明
 " au FileType gitcommit,gitrebase let g:gutentags_enabled=0
+let g:gutentags_enabled=1
 if has("autocmd")
     au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
 endif
@@ -430,3 +414,8 @@ nnoremap <silent> <space>gc :<C-u>Clap commits<CR>
 " search git files
 
 let g:clang_format#auto_format_on_insert_leave=1
+
+nmap ss <Plug>(easymotion-s2)
+
+autocmd FileType go nmap <leader>t  <Plug>(go-test)
+
