@@ -8,6 +8,7 @@ Plug 'luochen1990/rainbow'
 Plug 'preservim/nerdtree'
 Plug 'Xuyuanp/nerdtree-git-plugin'
 Plug 'majutsushi/tagbar'
+Plug 'cdelledonne/vim-cmake'
 Plug 'octol/vim-cpp-enhanced-highlight'
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'liuchengxu/vim-clap', {'do': ':Clap install-binary!' }
