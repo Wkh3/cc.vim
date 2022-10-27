@@ -18,8 +18,8 @@ apt-get install npm -y
 echo  "----------------install coc.vim----------------"
 curl -sL install-node.vercel.app/lts | bash
 apt-get install ccls -y
-cd ~/.config/vim/plugged/coc.nvim
-npm install
+#cd ~/.config/vim/plugged/coc.nvim
+#npm install
 
 echo  "----------------install fzf---------------"
 git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
