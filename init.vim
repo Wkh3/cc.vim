@@ -424,7 +424,7 @@ nnoremap <silent> <space>b :<C-u>Clap buffers<CR>
 " search history files(v:oldfiles) and opened buffers
 nnoremap <silent> <space>hf :<C-u>Clap history<CR>
 
-nmap ss <Plug> (easymotion-s2)
+nmap ss <Plug>(easymotion-s2)
 " 3. git kinds of search
 
 " search git commits
