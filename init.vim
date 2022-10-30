@@ -15,6 +15,7 @@ Plug 'liuchengxu/vim-clap', {'do': ':Clap install-binary!' }
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
 Plug 'rhysd/vim-clang-format'
+Plug 'easymotion/vim-easymotion'
 call plug#end()
 
 let g:indent_guides_guide_size            = 1  " 指定对齐线的尺寸
@@ -423,6 +424,7 @@ nnoremap <silent> <space>b :<C-u>Clap buffers<CR>
 " search history files(v:oldfiles) and opened buffers
 nnoremap <silent> <space>hf :<C-u>Clap history<CR>
 
+nmap ss <Plug> (easymotion-s2)
 " 3. git kinds of search
 
 " search git commits
